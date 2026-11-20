@@ -26,7 +26,7 @@ class MySQLClientManager:
         return f"mysql+asyncmy://{self.db_config.user}:{self.db_config.password}@{self.db_config.host}:{self.db_config.port}/{self.db_config.database}?charset=utf8mb4"
     def init(self):
         """为引擎对象赋值create_async_engine(url:数据库连接字符串,echo=是否控制台输出生成的sql)"""
-        self.engine = create_async_engine(url=self._get_url(),echo=True)
+        self.engine = create_async_engine(url=self._get_url(),echo=False)
         #autobegin控制事务是否自动开启
         self.session_factory = async_sessionmaker(bind=self.engine,autobegin=True,autoflush=True,expire_on_commit=False)
 
