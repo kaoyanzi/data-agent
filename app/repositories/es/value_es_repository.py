@@ -1,11 +1,12 @@
 from dataclasses import asdict
 
+from elastic_transport import ObjectApiResponse
 from elasticsearch import AsyncElasticsearch
 
 from app.entities.value_info import ValueInfo
 
 
-class ValueInfoRepository():
+class ValueInfoRepository:
 
 
     INDEX_NAME = "data-agent-column"
@@ -44,3 +45,16 @@ class ValueInfoRepository():
                 })
                 operations.append(asdict(value_info))
             await self.client.bulk(operations=operations)
+
+    async def search(self, keyword:str, min_score:float=0.6, size:int=10)->list[ValueInfo]:
+        result:ObjectApiResponse = await self.client.search(
+            index=self.INDEX_NAME,
+            query={
+                "match":{
+                    "value":keyword
+                }
+            },
+            min_score= min_score,
+            size= size,
+        )
+        return [ValueInfo(**hit["_source"]) for hit in result.body["hits"]["hits"]]

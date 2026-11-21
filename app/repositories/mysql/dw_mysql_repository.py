@@ -14,7 +14,7 @@ class DwMysqlRepository():
         return {row.Field:row.Type for row in result.fetchall()}
 
     async def get_column_values(self, table_id:str, column_name:str,limit:int=3)->list[str]:
-        sql = f"select distinct {column_name} from {table_id} limit 3"
+        sql = f"select distinct {column_name} from {table_id} limit {limit}"
         result:Result = await self.session.execute(text(sql))
         #单列多行结果
         return result.scalars().fetchall()

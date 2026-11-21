@@ -54,10 +54,10 @@ async def bulid():
         #3提交事务,关闭各个客户端
         await meta_session.commit()
 
-    await dw_mysql_client_manager.close()
-    await meta_mysql_client_manager.close()
-    await qdrant_client_manager.close()
-    await es_client_manager.close()
+        await dw_mysql_client_manager.close()
+        await meta_mysql_client_manager.close()
+        await qdrant_client_manager.close()
+        await es_client_manager.close()
 
 
 
