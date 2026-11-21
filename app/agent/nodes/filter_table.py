@@ -1,15 +1,40 @@
+import yaml
+from langchain_core.output_parsers import JsonOutputParser
+from langchain_core.prompts import PromptTemplate
 from langgraph.runtime import Runtime
 
 from app.agent.context import DataAgentContext
-from app.agent.state import DataAgentState
+from app.agent.llm import llm
+from app.agent.state import DataAgentState, TableInfoStata
 from app.core.log import logger
+from app.prompt.prompt_loader import load_prompt
 
 
 async def filter_table(state:DataAgentState,runtime:Runtime[DataAgentContext]):
     writer = runtime.stream_writer
     try:
         writer({"type":"process","step":"过滤表格","state":"running"})
+        table_infos:list[TableInfoStata] = state["table_infos"]
+        query = state["query"]
+        prompt = PromptTemplate(template=load_prompt("filter_table_info"),input_variables=["query","table_infos"])
+        chain = prompt | llm | JsonOutputParser()
+        result = await chain.ainvoke(
+            {
+                "query":query,
+                "table_infos": yaml.dump(table_infos,allow_unicode=True,sort_keys=False)
+            }
+        )
+        for table_info in table_infos[:]:
+            if table_info["name"] not in result:
+                table_infos.remove(table_info)
+            else:
+                for column in table_info["columns"][:]:
+                    if column["name"] not in result[table_info["name"]]:
+                        table_info["columns"].remove(column)
+
         writer({"type":"process","step":"过滤表格","state":"success"})
+        logger.info("过滤表格成功:{}",table_infos)
+        return {"table_infos":table_infos}
     except Exception as e:
         logger.error(str(e))
         writer({"type": "process", "step": "过滤表格", "state": "failed"})

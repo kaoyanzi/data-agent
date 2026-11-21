@@ -80,7 +80,7 @@ if __name__ == '__main__':
     # print(result)
 
     async def test_graph():
-        state = DataAgentState(query="统计华北地区的销售额")
+        state = DataAgentState(query="2025 年 1 月各省份订单金额排名")
 
         dw_mysql_client_manager.init()
         meta_mysql_client_manager.init()

@@ -1,6 +1,7 @@
 from openai.types.beta.realtime import session
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.entities.column_info import ColumnInfo
 from app.entities.column_metric import ColumnMetric
 from app.entities.metric_info import MetricInfo
 from app.entities.table_info import TableInfo
@@ -8,6 +9,10 @@ from app.mappers.column_info_mapper import ColumnInfoMapper
 from app.mappers.column_metric_mapper import ColumnMetricMapper
 from app.mappers.metric_info_mapper import MetricInfoMapper
 from app.mappers.table_info_mapper import TableInfoMapper
+from app.models.column_info_mysql import ColumnInfoMySQL
+from sqlalchemy import select
+
+from app.models.table_info_mysql import TableInfoMySQL
 
 
 class MetaMysqlRepository():
@@ -32,3 +37,31 @@ class MetaMysqlRepository():
     async def save_column_metric_infos(self, column_metric_infos:list[ColumnMetric]):
         models = [ColumnMetricMapper.to_model(column_metric_info) for column_metric_info in column_metric_infos]
         self.session.add_all(models)
+
+    async def get_column_info_by_id(self, column_id:str)->ColumnInfo:
+        """
+            根据id获取字段信息
+        :param id:
+        :return:
+        """
+        column_info_mysql:ColumnInfoMySQL = await self.session.get(ColumnInfoMySQL,column_id)
+        return ColumnInfoMapper.to_entity(column_info_mysql)
+
+    async def get_key_columns(self, table_id:str)->list[ColumnInfo]:
+        """
+        根据表的id获得主外键字段信息列表
+        :param table_id:
+        :return:
+        """
+        stmt = select(ColumnInfoMySQL).where(ColumnInfoMySQL.table_id == table_id,ColumnInfoMySQL.role.in_(['primary_key','foreign_key']))
+        column_info_mysqls:list[ColumnInfoMySQL] = await self.session.scalars(stmt)
+        return [ColumnInfoMapper.to_entity(column_info_mysql) for column_info_mysql in column_info_mysqls]
+
+    async def get_table_info_by_id(self, table_id:str)->TableInfo|None:
+        """
+        根据表id查询表信息
+        :param table_id:
+        :return:
+        """
+        table_info_mysql:TableInfoMySQL|None = await self.session.get(TableInfoMySQL,table_id)
+        return TableInfoMapper.to_entity(table_info_mysql)
