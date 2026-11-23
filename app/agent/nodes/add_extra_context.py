@@ -10,7 +10,7 @@ from app.core.log import logger
 async def add_extra_context(state:DataAgentState,runtime:Runtime[DataAgentContext]):
     writer = runtime.stream_writer
     try:
-        writer({"type":"process","step":"添加额外的上下文","state":"running"})
+        writer({"type":"progress","step":"添加额外的上下文","status":"running"})
         # 1.获取当前时间 日期、星期、季度
         today = datetime.today()
         # 日期
@@ -32,9 +32,9 @@ async def add_extra_context(state:DataAgentState,runtime:Runtime[DataAgentContex
             version=db_indo_dict["version"],
         )
         logger.info("额外的上下文的数据库的信息:{}",db_info)
-        writer({"type":"process","step":"添加额外的上下文","state":"success"})
+        writer({"type":"progress","step":"添加额外的上下文","status":"success"})
         return {"date_info": date_info, "db_info": db_info}
     except Exception as e:
         logger.error(str(e))
-        writer({"type": "process", "step": "添加额外的上下文", "state": "failed"})
+        writer({"type": "progress", "step": "添加额外的上下文", "status": "failed"})
         raise e

@@ -13,7 +13,7 @@ from app.prompt.prompt_loader import load_prompt
 async def correct_sql(state:DataAgentState,runtime:Runtime[DataAgentContext]):
     writer = runtime.stream_writer
     try:
-        writer({"type":"process","step":"修正SQL","state":"running"})
+        writer({"type":"progress","step":"修正SQL","status":"running"})
         modify_count = state.get("modify_count",0)
         if modify_count >= 3:
             raise Exception("SQL修复次数到达三次,终止流程")
@@ -35,10 +35,10 @@ async def correct_sql(state:DataAgentState,runtime:Runtime[DataAgentContext]):
             "sql": sql,
             "error": error,
         })
-        writer({"type":"process","step":"修正SQL","state":"success"})
+        writer({"type":"progress","step":"修正SQL","status":"success"})
         logger.info("修复后的SQL:{}",new_sql)
         return {"sql":new_sql,"modify_count":modify_count+1}
     except Exception as e:
         logger.error(str(e))
-        writer({"type": "process", "step": "修正SQL", "state": "failed"})
+        writer({"type": "progress", "step": "修正SQL", "status": "failed"})
         raise e

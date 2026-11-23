@@ -13,7 +13,7 @@ from app.prompt.prompt_loader import load_prompt
 async def filter_table(state:DataAgentState,runtime:Runtime[DataAgentContext]):
     writer = runtime.stream_writer
     try:
-        writer({"type":"process","step":"过滤表格","state":"running"})
+        writer({"type":"progress","step":"过滤表格","status":"running"})
         table_infos:list[TableInfoStata] = state["table_infos"]
         query = state["query"]
         prompt = PromptTemplate(template=load_prompt("filter_table_info"),input_variables=["query","table_infos"])
@@ -32,10 +32,10 @@ async def filter_table(state:DataAgentState,runtime:Runtime[DataAgentContext]):
                     if column["name"] not in result[table_info["name"]]:
                         table_info["columns"].remove(column)
 
-        writer({"type":"process","step":"过滤表格","state":"success"})
+        writer({"type":"progress","step":"过滤表格","status":"success"})
         logger.info("过滤表格成功:{}",table_infos)
         return {"table_infos":table_infos}
     except Exception as e:
         logger.error(str(e))
-        writer({"type": "process", "step": "过滤表格", "state": "failed"})
+        writer({"type": "progress", "step": "过滤表格", "status": "failed"})
         raise e

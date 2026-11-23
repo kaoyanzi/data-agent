@@ -14,7 +14,7 @@ from app.prompt.prompt_loader import load_prompt
 async def recall_value(state:DataAgentState,runtime:Runtime[DataAgentContext]):
     writer = runtime.stream_writer
     try:
-        writer({"type":"process","step":"召回字段取值","state":"running"})
+        writer({"type":"progress","step":"召回字段取值","status":"running"})
         #扩充关键词
         prompt = PromptTemplate(template=load_prompt("extend_keywords_for_value_recall"),input_variables=["query"])
         chain = prompt | llm | JsonOutputParser()
@@ -32,10 +32,10 @@ async def recall_value(state:DataAgentState,runtime:Runtime[DataAgentContext]):
                 if value_info.id not in retrieved_value_dict:
                     retrieved_value_dict[value_info.id] = value_info
         #更新state
-        writer({"type":"process","step":"召回字段取值","state":"success"})
+        writer({"type":"progress","step":"召回字段取值","status":"success"})
         logger.info(f"召回字段取值成功：{list(retrieved_value_dict.values())}")
         return {"retrieved_values":list(retrieved_value_dict.values())}
     except Exception as e:
         logger.error(str(e))
-        writer({"type": "process", "step": "召回字段取值", "state": "failed"})
+        writer({"type": "progress", "step": "召回字段取值", "status": "failed"})
         raise e

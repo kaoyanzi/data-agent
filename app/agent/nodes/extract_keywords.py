@@ -12,7 +12,7 @@ async def extract_keywords(state: DataAgentState,runtime:Runtime[DataAgentContex
     #获取流写入器,输出自定义数据
     writer = get_stream_writer()
     try:
-        writer({"type":"process","step":"抽取关键词","status":"running"})
+        writer({"type":"progress","step":"抽取关键词","status":"running"})
         #1.从状态中获取用户提问
         query = state["query"]
         #2.用jieba进行分词
@@ -34,10 +34,10 @@ async def extract_keywords(state: DataAgentState,runtime:Runtime[DataAgentContex
         #3.得到关键词的列表
         keywords = list(set(keywords+[query]))
         #4.更新state
-        writer({"type":"process","step": "抽取关键词", "status": "success"})
+        writer({"type":"progress","step": "抽取关键词", "status": "success"})
         return {"keywords":keywords}
     except Exception as e:
-        writer({"type":"process","step": "抽取关键词", "status": "error"})
+        writer({"type":"progress","step": "抽取关键词", "status": "error"})
         raise e
 if __name__ == '__main__':
     allow_pos = (

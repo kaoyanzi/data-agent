@@ -13,7 +13,7 @@ from app.repositories.mysql.meta_mysql_repository import MetaMysqlRepository
 async def merge_retrieved_info(state:DataAgentState,runtime:Runtime[DataAgentContext]):
     writer = runtime.stream_writer
     try:
-        writer({"type":"process","step":"合并召回信息","state":"running"})
+        writer({"type":"progress","step":"合并召回信息","status":"running"})
         retrieved_columns:list[ColumnInfo] = state["retrieved_columns"]
         retrieved_columns_dict:dict[str,ColumnInfo] = {column.id:column  for column in retrieved_columns}
 
@@ -79,9 +79,9 @@ async def merge_retrieved_info(state:DataAgentState,runtime:Runtime[DataAgentCon
             metric_infos.append(metric_info)
         logger.info("合并召回信息的节点:{}", metric_infos)
 
-        writer({"type":"process","step":"合并召回信息","state":"success"})
+        writer({"type":"progress","step":"合并召回信息","status":"success"})
         return {"table_infos":table_infos,"metric_infos":metric_infos}
     except Exception as e:
         logger.error(str(e))
-        writer({"type": "process", "step": "合并召回信息", "state": "failed"})
+        writer({"type": "progress", "step": "合并召回信息", "status": "failed"})
         raise e

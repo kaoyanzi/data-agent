@@ -19,7 +19,7 @@ async def filter_metric(state:DataAgentState,runtime:Runtime[DataAgentContext]):
     """
     writer = runtime.stream_writer
     try:
-        writer({"type":"process","step":"过滤指标","state":"running"})
+        writer({"type":"progress","step":"过滤指标","status":"running"})
         metric_infos:list[MetricInfoStata] = state["metric_infos"]
         query = state["query"]
         prompt = PromptTemplate(template=load_prompt("filter_metric_info"),input_variables=["query","metric_infos"])
@@ -29,10 +29,10 @@ async def filter_metric(state:DataAgentState,runtime:Runtime[DataAgentContext]):
         for metric_info in metric_infos[:]:
             if metric_info["name"] not in result:
                 metric_infos.remove(metric_info)
-        writer({"type":"process","step":"过滤指标","state":"success"})
+        writer({"type":"progress","step":"过滤指标","status":"success"})
         logger.info("过滤指标成功:{}",metric_infos)
         return {"metric_infos":metric_infos}
     except Exception as e:
         logger.error(str(e))
-        writer({"type": "process", "step": "过滤指标", "state": "failed"})
+        writer({"type": "progress", "step": "过滤指标", "status": "failed"})
         raise e

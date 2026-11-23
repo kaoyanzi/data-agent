@@ -13,7 +13,7 @@ from app.prompt.prompt_loader import load_prompt
 async def generate_sql(state:DataAgentState,runtime:Runtime[DataAgentContext]):
     writer = runtime.stream_writer
     try:
-        writer({"type":"process","step":"生成SQL","state":"running"})
+        writer({"type":"progress","step":"生成SQL","status":"running"})
         query = state["query"]
         table_infos:list[TableInfoStata] = state["table_infos"]
         metric_infos:list[MetricInfoStata] = state["metric_infos"]
@@ -30,9 +30,9 @@ async def generate_sql(state:DataAgentState,runtime:Runtime[DataAgentContext]):
             "db_info":yaml.dump(db_info,allow_unicode=True,sort_keys=False)
         })
         logger.info("生成的SQL:{}",sql)
-        writer({"type":"process","step":"生成SQL","state":"success"})
+        writer({"type":"progress","step":"生成SQL","status":"success"})
         return {"sql":sql}
     except Exception as e:
         logger.error(str(e))
-        writer({"type": "process", "step": "生成SQL", "state": "failed"})
+        writer({"type": "progress", "step": "生成SQL", "status": "failed"})
         raise e

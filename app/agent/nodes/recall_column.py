@@ -14,7 +14,7 @@ async def recall_column(state: DataAgentState,runtime:Runtime[DataAgentContext])
     logger.info("召回字段节点")
     writer = runtime.stream_writer
     try:
-        writer({"type":"process","step":"召回字段","status":"running"})
+        writer({"type":"progress","step":"召回字段","status":"running"})
         keywords = state["keywords"]
         #调用大预言模型,对用户的问题进行一个扩充回答问题可能用到的(中文语义)字段列表,得到关键词列表
         prompt = PromptTemplate(template=load_prompt('extend_keywords_for_column_recall'),input_variables=["query"])
@@ -32,10 +32,10 @@ async def recall_column(state: DataAgentState,runtime:Runtime[DataAgentContext])
             for column_info in column_infos:
                 if column_info.id not in retrieved_column_infos_dict:
                     retrieved_column_infos_dict[column_info.id] = column_info
-        writer({"type":"process","step":"召回字段","status":"success"})
+        writer({"type":"progress","step":"召回字段","status":"success"})
         logger.info("召回字段成功:{}",list(retrieved_column_infos_dict.keys()))
         #更新state状态
         return {"retrieved_columns":list(retrieved_column_infos_dict.values())}
     except Exception as e:
-        writer({"type": "process", "step": "召回字段", "status": "failed"})
+        writer({"type": "progress", "step": "召回字段", "status": "failed"})
         raise e

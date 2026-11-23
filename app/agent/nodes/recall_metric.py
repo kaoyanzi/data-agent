@@ -13,7 +13,7 @@ from app.prompt.prompt_loader import load_prompt
 async def recall_metric(state:DataAgentState,runtime:Runtime[DataAgentContext]):
     writer = runtime.stream_writer
     try:
-        writer({"type":"process","step":"召回指标","state":"running"})
+        writer({"type":"progress","step":"召回指标","status":"running"})
         keywords = state["keywords"]
         prompt = PromptTemplate(template=load_prompt("extend_keywords_for_metric_recall"),input_variables=["query"])
         chain = prompt | llm | JsonOutputParser()
@@ -34,11 +34,11 @@ async def recall_metric(state:DataAgentState,runtime:Runtime[DataAgentContext]):
         for metric_info in metric_infos:
             if metric_info.id not in retrieved_metrics_dict:
                 retrieved_metrics_dict[metric_info.id] = metric_info
-        writer({"type":"process","step":"召回指标","state":"success"})
+        writer({"type":"progress","step":"召回指标","status":"success"})
         logger.info("召回指标成功:{}", list(retrieved_metrics_dict.keys()))
         # 更新state状态
         return {"retrieved_metrics": list(retrieved_metrics_dict.values())}
     except Exception as e:
         logger.error(str(e))
-        writer({"type": "process", "step": "召回指标", "state": "failed"})
+        writer({"type": "progress", "step": "召回指标", "status": "failed"})
         raise e
